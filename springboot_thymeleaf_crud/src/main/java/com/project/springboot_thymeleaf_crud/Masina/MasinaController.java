@@ -1,22 +1,26 @@
 package com.project.springboot_thymeleaf_crud.Masina;
 
+import com.project.springboot_thymeleaf_crud.Utilizator.Utilizator;
+import com.project.springboot_thymeleaf_crud.Utilizator.UtilizatorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 public class MasinaController
 {
     @Autowired
     MasinaRepository repository;
+    @Autowired
+    UtilizatorRepository utilizatorRepository;
 
     @GetMapping("/masini")
-    public String get_lista_masini(Model model,
+    public String getListaMasini(Model model,
                                    @RequestParam(required = false) String marca,
                                    @RequestParam(required = false) String culoare,
                                    @RequestParam(required = false) String combustibil)
@@ -42,5 +46,48 @@ public class MasinaController
         model.addAttribute("combustibilSelectat", combustibil);
 
         return "masini";
+    }
+
+    @GetMapping("/masini/adauga")
+    public String adaugaMasina(Model model)
+    {
+        model.addAttribute("masina", new Masina());
+        model.addAttribute("isEditMode", false);
+        return "form-masina";
+    }
+
+    @GetMapping("/masini/editeaza/{id}")
+    public String editMasina(@PathVariable String id, Model model)
+    {
+        Optional<Masina> masina = repository.findById(id);
+        if (masina.isPresent()) {
+            model.addAttribute("masina", masina.get());
+            model.addAttribute("isEditMode", true);
+            return "form-masina";
+        }
+        return "redirect:/masini";
+    }
+
+    @PostMapping("/masini/salveaza")
+    public String saveMasina(@ModelAttribute Masina masina, Principal principal)
+    {
+        // If it's a new car (no owner yet), assign the current editor as the owner
+        if (masina.getIdUtilizator() == 0) {
+            Utilizator currentUser = utilizatorRepository.findByUtilizator(principal.getName()).orElse(null);
+            if (currentUser != null) {
+                masina.setIdUtilizator(currentUser.getIdUtilizator());
+            }
+        }
+        // If editing, the hidden field or existing object keeps the original id_utilizator
+
+        repository.save(masina);
+        return "redirect:/masini";
+    }
+
+    @PostMapping("/masini/sterge/{id}")
+    public String deleteMasina(@PathVariable String id)
+    {
+        repository.deleteById(id);
+        return "redirect:/masini";
     }
 }
