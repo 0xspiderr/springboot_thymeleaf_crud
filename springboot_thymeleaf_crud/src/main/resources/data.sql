@@ -1,3 +1,10 @@
+-- parola pt amandoi este "parola"
+INSERT INTO utilizatori (nume, utilizator, parola, rol)
+VALUES ("Popescu Ion", "editor", "$2a$12$Bfd3eibZxKk8u5N0BPHvfejyzhdtL0xFlqjgnnfpS6.snj9dZQeNy", "ROLE_EDITOR");
+
+INSERT INTO utilizatori (nume, utilizator, parola, rol)
+VALUES ("Popescu Dan", "user", "$2a$12$Bfd3eibZxKk8u5N0BPHvfejyzhdtL0xFlqjgnnfpS6.snj9dZQeNy", "ROLE_USER");
+
 insert into masini(nr_inmatriculare,
 id_utilizator,
 marca,
